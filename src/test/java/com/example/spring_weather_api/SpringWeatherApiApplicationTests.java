@@ -3,13 +3,17 @@ package com.example.spring_weather_api;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.spring_weather_api.domain.CityCordinates;
+import com.example.spring_weather_api.domain.CityWeather;
 import com.example.spring_weather_api.entity.GeocodingCordinatesEntity;
+import com.example.spring_weather_api.entity.OpenWeatherResponseEntity;
+import com.example.spring_weather_api.entity.WeatherEntity;
+import com.example.spring_weather_api.entity.WeatherResponse;
 import com.example.spring_weather_api.transformer.GeocordinatesTransformer;
+import com.example.spring_weather_api.transformer.OpenWeatherTransformer;
 
 @SpringBootTest
 class SpringWeatherApiApplicationTests {
@@ -35,4 +39,37 @@ class SpringWeatherApiApplicationTests {
 
 	}
 
+	@Test
+	void testOpenWeatherTransformer() {
+		final WeatherEntity weather = new WeatherEntity();
+		weather.setMain("Rain");
+		weather.setDescription("moderate rain");
+
+		final WeatherEntity[] weatherEntities = { weather };
+		final OpenWeatherResponseEntity openWeatherResponseEntity = OpenWeatherResponseEntity.builder()
+				.weather(weatherEntities)
+				.build();
+
+		final OpenWeatherTransformer openWeatherTransformer = new OpenWeatherTransformer();
+		final CityWeather cityWeather = openWeatherTransformer.transformToDomain(openWeatherResponseEntity);
+
+		assertAll("Should return a domain weather object",
+				() -> assertEquals(openWeatherResponseEntity.getWeather()[0].getMain(), cityWeather.getWeather()),
+				() -> assertEquals(openWeatherResponseEntity.getWeather()[0].getDescription(), cityWeather.getDetails()));
+
+	}
+
+	@Test
+	void testShouldTransformCityWeatherToEntity() {
+		final OpenWeatherTransformer openWeatherTransformer = new OpenWeatherTransformer();
+		final CityWeather cityWeather = new CityWeather();
+		cityWeather.setWeather("Rain");
+		cityWeather.setDetails("moderate rain");
+
+		final WeatherResponse weatherResponse = openWeatherTransformer.transformToEntity(cityWeather);
+
+		assertAll("Should return a weather response",
+				() -> assertEquals(cityWeather.getWeather(), weatherResponse.getWeather()),
+				() -> assertEquals(cityWeather.getDetails(), weatherResponse.getDetails()));
+	}
 }
