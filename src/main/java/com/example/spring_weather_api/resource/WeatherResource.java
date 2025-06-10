@@ -1,13 +1,12 @@
 package com.example.spring_weather_api.resource;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.spring_weather_api.domain.WeatherRequestDetails;
-import com.example.spring_weather_api.entity.WeatherResponse;
+import com.example.spring_weather_api.entity.WeatherEntity;
 import com.example.spring_weather_api.service.WeatherService;
 
 @RestController
@@ -21,9 +20,9 @@ public class WeatherResource {
   }
 
   @GetMapping("/weather/{city}")
-  public @ResponseBody WeatherResponse weather(@PathVariable("city") String city) throws Exception {
-    final WeatherRequestDetails weatherRequestDetails = WeatherRequestDetails.builder().city(city).build();
-    return weatherService.getWeather(weatherRequestDetails);
+  public @ResponseBody WeatherEntity weather(@PathVariable String city) throws Exception {
+    WeatherEntity weather = weatherService.getWeather(city);
+    System.out.println(weather);
+    return weather;
   }
-
 }

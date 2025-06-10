@@ -11,6 +11,5 @@ public class SpringWeatherApiApplication {
 	public static void main(String[] args) {
 		ApplicationContext context = SpringApplication.run(SpringWeatherApiApplication.class, args);
 		AppConfig appConfig = context.getBean(AppConfig.class);
-		System.out.println("API Key: " + appConfig.getApiKey());
 	}
 }

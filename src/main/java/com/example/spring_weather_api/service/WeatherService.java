@@ -1,40 +1,52 @@
 package com.example.spring_weather_api.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.spring_weather_api.domain.CityCordinates;
-import com.example.spring_weather_api.domain.CityWeather;
-import com.example.spring_weather_api.domain.WeatherRequestDetails;
+import com.example.spring_weather_api.config.AppConfig;
+import com.example.spring_weather_api.entity.CityCoordinates;
+import com.example.spring_weather_api.entity.WeatherEntity;
 import com.example.spring_weather_api.entity.WeatherResponse;
-import com.example.spring_weather_api.provider.GeocodingProvider;
-import com.example.spring_weather_api.provider.WeatherProvider;
-import com.example.spring_weather_api.transformer.GeocordinatesTransformer;
-import com.example.spring_weather_api.transformer.OpenWeatherTransformer;
 
 @Service
 public class WeatherService {
 
-  private GeocodingProvider geocodingProvider;
-  private GeocordinatesTransformer geocordinatesTransformer;
-  private WeatherProvider weatherProvider;
-  private OpenWeatherTransformer openWeatherTransformer;
+  @Value("${geocoding.url}")
+  private String geoCordUrl;
 
-  public WeatherService(GeocodingProvider geocodingProvider, GeocordinatesTransformer geocordinatesTransformer,
-      WeatherProvider weatherProvider, OpenWeatherTransformer openWeatherTransformer) {
-    this.geocodingProvider = geocodingProvider;
-    this.geocordinatesTransformer = geocordinatesTransformer;
-    this.weatherProvider = weatherProvider;
-    this.openWeatherTransformer = openWeatherTransformer;
+  @Value("${weather.url}")
+  private String weatherUrl;
+
+  private String apiKey;
+
+
+  public WeatherService(AppConfig appConfig) {
+    this.apiKey = appConfig.getApiKey();
   }
 
-  public WeatherResponse getWeather(final WeatherRequestDetails weatherRequestDetails) throws Exception {
-    final CityCordinates cityCordinates = geocordinatesTransformer
-        .transformToDomain(geocodingProvider.getCityCordinates(weatherRequestDetails));
+  public WeatherEntity getWeather(String city) {
 
-    final CityWeather cityWeather = openWeatherTransformer
-        .transformToDomain(weatherProvider.getCityWeather(cityCordinates));
+    RestTemplate restTemplate = new RestTemplate();
+    UriComponents urlBuilder = UriComponentsBuilder.fromUriString(geoCordUrl)
+        .queryParam("q", city)
+        .queryParam("limit", "1")
+        .queryParam("appid", apiKey)
+        .build();
 
-    return openWeatherTransformer.transformToEntity(cityWeather);
+    CityCoordinates[] cityCoordinates = restTemplate.getForObject(urlBuilder.toUriString(), CityCoordinates[].class);
+
+    urlBuilder = UriComponentsBuilder.fromUriString(weatherUrl)
+      .queryParam("lat", cityCoordinates[0].getLatitude())
+      .queryParam("lon", cityCoordinates[0].getLongitude())
+      .queryParam("appid", apiKey)
+      .build();
+
+    WeatherResponse weather = restTemplate.getForObject(urlBuilder.toUriString(), WeatherResponse.class);
+
+    return weather.getWeather()[0];
   }
 
 }
