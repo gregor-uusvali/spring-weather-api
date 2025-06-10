@@ -27,7 +27,7 @@ public class WeatherJob implements Job {
     
     try {
       WeatherEntity weather = weatherResource.weather("Tartu");
-      log.info("Weather job completed successfully. Weather: {}", weather.getMain());
+      log.info("Weather job completed successfully. Weather: {}", weather.main());
     } catch (Exception e) {
       log.error("Failed to fetch weather data for city: Tartu", e);
       // Re-throw as JobExecutionException to let Quartz handle it

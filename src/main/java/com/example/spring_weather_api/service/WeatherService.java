@@ -39,14 +39,14 @@ public class WeatherService {
     CityCoordinates[] cityCoordinates = restTemplate.getForObject(urlBuilder.toUriString(), CityCoordinates[].class);
 
     urlBuilder = UriComponentsBuilder.fromUriString(weatherUrl)
-      .queryParam("lat", cityCoordinates[0].getLatitude())
-      .queryParam("lon", cityCoordinates[0].getLongitude())
+      .queryParam("lat", cityCoordinates[0].latitude())
+      .queryParam("lon", cityCoordinates[0].longitude())
       .queryParam("appid", apiKey)
       .build();
 
     WeatherResponse weather = restTemplate.getForObject(urlBuilder.toUriString(), WeatherResponse.class);
 
-    return weather.getWeather()[0];
+    return weather.weather()[0];
   }
 
 }
